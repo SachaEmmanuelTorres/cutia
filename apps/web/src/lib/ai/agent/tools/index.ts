@@ -2,6 +2,7 @@ import type { OpenAIToolSchema } from "../types";
 import { aiGenerationTools } from "./ai-generation-tools";
 import { captionTools } from "./caption-tools";
 import { characterTools } from "./character-tools";
+import { frameTools } from "./frame-tools";
 import { mediaTools } from "./media-tools";
 import { projectTools } from "./project-tools";
 import { timelineTools } from "./timeline-tools";
@@ -10,6 +11,7 @@ import { type AgentTool, buildToolSchema } from "./types";
 
 const ALL_TOOLS: AgentTool[] = [
 	...projectTools,
+	...frameTools,
 	...mediaTools,
 	...timelineTools,
 	...captionTools,
