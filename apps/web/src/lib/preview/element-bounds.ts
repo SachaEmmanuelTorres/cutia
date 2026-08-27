@@ -1,5 +1,6 @@
 import type { TimelineElement, Transform } from "@/types/timeline";
 import type { MediaAsset } from "@/types/assets";
+import type { TCanvasSize } from "@/types/project";
 import { FONT_SIZE_SCALE_REFERENCE } from "@/constants/text-constants";
 import { isBottomAlignedSubtitleText } from "@/lib/timeline/text-utils";
 
@@ -14,18 +15,23 @@ export function getElementHalfSize({
 	mediaMap,
 	canvasWidth,
 	canvasHeight,
+	fitCanvasSize = { width: canvasWidth, height: canvasHeight },
 }: {
 	element: TimelineElement;
 	transform: Transform;
 	mediaMap: Map<string, MediaAsset>;
 	canvasWidth: number;
 	canvasHeight: number;
+	fitCanvasSize?: TCanvasSize;
 }): ElementHalfSize | null {
 	if (element.type === "video" || element.type === "image") {
 		const media = mediaMap.get(element.mediaId);
 		const mediaW = media?.width || canvasWidth;
 		const mediaH = media?.height || canvasHeight;
-		const containScale = Math.min(canvasWidth / mediaW, canvasHeight / mediaH);
+		const containScale = Math.min(
+			fitCanvasSize.width / mediaW,
+			fitCanvasSize.height / mediaH,
+		);
 		return {
 			halfWidth: (mediaW * containScale * transform.scale) / 2,
 			halfHeight: (mediaH * containScale * transform.scale) / 2,

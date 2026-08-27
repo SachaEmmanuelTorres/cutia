@@ -41,11 +41,22 @@ function MobileRenderTreeController() {
 			mediaAssets,
 			duration,
 			canvasSize: { width, height },
+			fitCanvasSize: activeProject.settings.originalCanvasSize ?? {
+				width,
+				height,
+			},
 			background: activeProject.settings.background,
 		});
 
 		editor.renderer.setRenderTree({ renderTree });
-	}, [tracks, mediaAssets, activeProject?.settings.background, width, height]);
+	}, [
+		tracks,
+		mediaAssets,
+		activeProject?.settings.background,
+		activeProject?.settings.originalCanvasSize,
+		width,
+		height,
+	]);
 
 	return null;
 }

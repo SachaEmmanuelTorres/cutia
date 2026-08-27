@@ -120,6 +120,8 @@ export const inspectFrameTool: AgentTool = {
 				mediaAssets: editor.media.getAssets(),
 				duration: editor.timeline.getTotalDuration(),
 				canvasSize: project.settings.canvasSize,
+				fitCanvasSize:
+					project.settings.originalCanvasSize ?? project.settings.canvasSize,
 				background: project.settings.background,
 			});
 			const renderer = new CanvasRenderer({

@@ -115,6 +115,8 @@ export function usePreviewInteraction({
 
 			const canvasWidth = canvasRef.current?.width ?? 0;
 			const canvasHeight = canvasRef.current?.height ?? 0;
+			const fitCanvasSize = editor.project.getActive().settings
+				.originalCanvasSize ?? { width: canvasWidth, height: canvasHeight };
 			const tracks = editor.timeline.getTracks();
 			const mediaAssets = editor.media.getAssets();
 			const currentTime = editor.playback.getCurrentTime();
@@ -125,6 +127,7 @@ export function usePreviewInteraction({
 				mediaAssets,
 				canvasWidth,
 				canvasHeight,
+				fitCanvasSize,
 				currentTime,
 			});
 
@@ -205,6 +208,7 @@ export function usePreviewInteraction({
 				currentTime,
 				canvasWidth,
 				canvasHeight,
+				fitCanvasSize,
 				draggedElementIds,
 				primaryElement: dragStateRef.current.elements[0],
 			});
@@ -660,6 +664,7 @@ function buildSnapContext({
 	currentTime,
 	canvasWidth,
 	canvasHeight,
+	fitCanvasSize,
 	draggedElementIds,
 	primaryElement,
 }: {
@@ -668,6 +673,7 @@ function buildSnapContext({
 	currentTime: number;
 	canvasWidth: number;
 	canvasHeight: number;
+	fitCanvasSize: { width: number; height: number };
 	draggedElementIds: Set<string>;
 	primaryElement: { elementId: string; initialTransform: Transform };
 }): SnapContext | null {
@@ -690,6 +696,7 @@ function buildSnapContext({
 		mediaMap,
 		canvasWidth,
 		canvasHeight,
+		fitCanvasSize,
 	});
 
 	if (!elementHalfSize) return null;
@@ -715,6 +722,7 @@ function buildSnapContext({
 				mediaMap,
 				canvasWidth,
 				canvasHeight,
+				fitCanvasSize,
 			});
 			if (!otherHalf) continue;
 
@@ -737,4 +745,3 @@ function buildSnapContext({
 
 	return { elementHalfSize, otherElementBounds, canvasWidth, canvasHeight };
 }
-

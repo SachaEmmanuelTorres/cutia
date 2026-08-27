@@ -102,6 +102,8 @@ export class RendererManager {
 				mediaAssets,
 				duration,
 				canvasSize,
+				fitCanvasSize:
+					activeProject.settings.originalCanvasSize ?? canvasSize,
 				background: activeProject.settings.background,
 			});
 

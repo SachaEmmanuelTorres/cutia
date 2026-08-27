@@ -1,6 +1,7 @@
 import type { CanvasRenderer } from "../canvas-renderer";
 import { BaseNode } from "./base-node";
 import type { Transform } from "@/types/timeline";
+import type { TCanvasSize } from "@/types/project";
 
 const VISUAL_EPSILON = 1 / 1000;
 
@@ -11,6 +12,7 @@ export interface VisualNodeParams {
 	trimEnd: number;
 	transform: Transform;
 	opacity: number;
+	fitCanvasSize?: TCanvasSize;
 	playbackRate?: number;
 	reversed?: boolean;
 }
@@ -49,10 +51,10 @@ export abstract class VisualNode<
 	}): void {
 		renderer.context.save();
 
-		const { transform, opacity } = this.params;
+		const { transform, opacity, fitCanvasSize } = this.params;
 		const containScale = Math.min(
-			renderer.width / sourceWidth,
-			renderer.height / sourceHeight,
+			(fitCanvasSize?.width ?? renderer.width) / sourceWidth,
+			(fitCanvasSize?.height ?? renderer.height) / sourceHeight,
 		);
 		const scaledWidth = sourceWidth * containScale * transform.scale;
 		const scaledHeight = sourceHeight * containScale * transform.scale;

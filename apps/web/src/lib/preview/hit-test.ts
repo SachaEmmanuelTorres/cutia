@@ -4,6 +4,7 @@ import type {
 	Transform,
 } from "@/types/timeline";
 import type { MediaAsset } from "@/types/assets";
+import type { TCanvasSize } from "@/types/project";
 import { isMainTrack } from "@/lib/timeline";
 import {
 	getElementHalfSize,
@@ -50,6 +51,7 @@ export function hitTestElements({
 	mediaAssets,
 	canvasWidth,
 	canvasHeight,
+	fitCanvasSize = { width: canvasWidth, height: canvasHeight },
 	currentTime,
 }: {
 	point: { x: number; y: number };
@@ -57,6 +59,7 @@ export function hitTestElements({
 	mediaAssets: MediaAsset[];
 	canvasWidth: number;
 	canvasHeight: number;
+	fitCanvasSize?: TCanvasSize;
 	currentTime: number;
 }): HitResult | null {
 	const mediaMap = new Map(mediaAssets.map((asset) => [asset.id, asset]));
@@ -105,6 +108,7 @@ export function hitTestElements({
 			mediaMap,
 			canvasWidth,
 			canvasHeight,
+			fitCanvasSize,
 		});
 
 		if (!size) continue;

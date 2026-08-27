@@ -64,19 +64,24 @@ function computeMediaBounds({
 	media,
 	canvasWidth,
 	canvasHeight,
+	fitCanvasSize,
 	displayScale,
 }: {
 	element: VideoElement | ImageElement;
 	media: MediaAsset | undefined;
 	canvasWidth: number;
 	canvasHeight: number;
+	fitCanvasSize: { width: number; height: number };
 	displayScale: number;
 }): ElementBounds | null {
 	if (!media) return null;
 
 	const mediaW = media.width || canvasWidth;
 	const mediaH = media.height || canvasHeight;
-	const containScale = Math.min(canvasWidth / mediaW, canvasHeight / mediaH);
+	const containScale = Math.min(
+		fitCanvasSize.width / mediaW,
+		fitCanvasSize.height / mediaH,
+	);
 	const scaledW = mediaW * containScale * element.transform.scale;
 	const scaledH = mediaH * containScale * element.transform.scale;
 
@@ -187,12 +192,14 @@ function computeElementBounds({
 	media,
 	canvasWidth,
 	canvasHeight,
+	fitCanvasSize,
 	displayScale,
 }: {
 	element: TimelineElement;
 	media: MediaAsset | undefined;
 	canvasWidth: number;
 	canvasHeight: number;
+	fitCanvasSize: { width: number; height: number };
 	displayScale: number;
 }): ElementBounds | null {
 	switch (element.type) {
@@ -203,6 +210,7 @@ function computeElementBounds({
 				media,
 				canvasWidth,
 				canvasHeight,
+				fitCanvasSize,
 				displayScale,
 			});
 		case "text":
@@ -368,6 +376,10 @@ export function SelectionOverlay({
 	const mediaAssets = editor.media.getAssets();
 	const canvasWidth = activeProject?.settings.canvasSize.width ?? 0;
 	const canvasHeight = activeProject?.settings.canvasSize.height ?? 0;
+	const fitCanvasSize = activeProject?.settings.originalCanvasSize ?? {
+		width: canvasWidth,
+		height: canvasHeight,
+	};
 	const displayScale = canvasWidth > 0 ? displaySize.width / canvasWidth : 1;
 
 	const mediaMap = useMemo(
@@ -404,6 +416,7 @@ export function SelectionOverlay({
 					media,
 					canvasWidth,
 					canvasHeight,
+					fitCanvasSize,
 					displayScale,
 				});
 

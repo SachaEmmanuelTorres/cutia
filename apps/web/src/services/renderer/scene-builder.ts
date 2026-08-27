@@ -21,6 +21,7 @@ import { isBottomAlignedSubtitleText } from "@/lib/timeline/text-utils";
 
 export type BuildSceneParams = {
 	canvasSize: TCanvasSize;
+	fitCanvasSize: TCanvasSize;
 	tracks: TimelineTrack[];
 	mediaAssets: MediaAsset[];
 	duration: number;
@@ -30,9 +31,11 @@ export type BuildSceneParams = {
 function buildVisualElementNode({
 	element,
 	mediaMap,
+	fitCanvasSize,
 }: {
 	element: VideoElement | ImageElement;
 	mediaMap: Map<string, MediaAsset>;
+	fitCanvasSize: TCanvasSize;
 }): BaseNode | null {
 	const mediaAsset = mediaMap.get(element.mediaId);
 	if (!mediaAsset?.file || !mediaAsset?.url) {
@@ -51,6 +54,7 @@ function buildVisualElementNode({
 			trimEnd: element.trimEnd,
 			transform: element.transform,
 			opacity: element.opacity,
+			fitCanvasSize,
 			playbackRate: videoElement.playbackRate,
 			reversed: videoElement.reversed,
 		});
@@ -65,6 +69,7 @@ function buildVisualElementNode({
 			trimEnd: element.trimEnd,
 			transform: element.transform,
 			opacity: element.opacity,
+			fitCanvasSize,
 		});
 	}
 
@@ -80,7 +85,14 @@ function getElementEndTime({
 }
 
 export function buildScene(params: BuildSceneParams) {
-	const { tracks, mediaAssets, duration, canvasSize, background } = params;
+	const {
+		tracks,
+		mediaAssets,
+		duration,
+		canvasSize,
+		fitCanvasSize,
+		background,
+	} = params;
 
 	const rootNode = new RootNode({ duration });
 	const mediaMap = new Map(mediaAssets.map((m) => [m.id, m]));
@@ -133,10 +145,12 @@ export function buildScene(params: BuildSceneParams) {
 						const outgoingNode = buildVisualElementNode({
 							element,
 							mediaMap,
+							fitCanvasSize,
 						});
 						const incomingNode = buildVisualElementNode({
 							element: nextElement,
 							mediaMap,
+							fitCanvasSize,
 						});
 
 						if (outgoingNode && incomingNode) {
@@ -163,7 +177,11 @@ export function buildScene(params: BuildSceneParams) {
 					}
 				}
 
-				const node = buildVisualElementNode({ element, mediaMap });
+				const node = buildVisualElementNode({
+					element,
+					mediaMap,
+					fitCanvasSize,
+				});
 				if (node) {
 					processedIds.add(element.id);
 					contentNodes.push(node);
