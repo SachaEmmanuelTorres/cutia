@@ -57,6 +57,7 @@ import { uppercase } from "@/utils/string";
 import { useTranslation } from "@i18next-toolkit/nextjs-approuter";
 import type { ComponentProps } from "react";
 import { VideoThumbnailStrip } from "./video-thumbnail-strip";
+import { Download } from "lucide-react";
 
 function getDisplayShortcut(action: TAction) {
 	const { defaultShortcuts } = getActionDefinition(action);
@@ -198,6 +199,14 @@ export function TimelineElement({
 					{t("Split")}
 				</ActionMenuItem>
 				<CopyMenuItem />
+				{element.type === "video" && selectedElements.length === 1 && (
+					<ActionMenuItem
+						action="export-selected-clip"
+						icon={<Download className="size-4" />}
+					>
+						{t("Export selected clip")}
+					</ActionMenuItem>
+				)}
 				{canElementHaveAudio(element) && hasAudio && (
 					<>
 						<MuteMenuItem

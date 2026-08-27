@@ -95,6 +95,10 @@ export const ACTIONS = {
 		category: "editing",
 		defaultShortcuts: ["ctrl+c"],
 	},
+	"export-selected-clip": {
+		description: "Export selected clip",
+		category: "editing",
+	},
 	"paste-copied": {
 		description: "Paste elements at playhead",
 		category: "editing",

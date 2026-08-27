@@ -12,7 +12,7 @@ import { mediaSupportsAudio } from "@/lib/media/media-utils";
 export type CollectedAudioElement = Omit<
 	AudioElement,
 	"type" | "mediaId" | "id" | "name" | "sourceType" | "sourceUrl"
-> & { buffer: AudioBuffer };
+> & { buffer: AudioBuffer; reversed?: boolean };
 
 export function createAudioContext(): AudioContext {
 	const AudioContextConstructor =
@@ -111,6 +111,7 @@ export async function collectAudioElements({
 						trimEnd: element.trimEnd,
 						volume,
 						muted,
+						playbackRate: element.playbackRate ?? 1,
 					};
 				}),
 			);
@@ -135,6 +136,8 @@ export async function collectAudioElements({
 						trimEnd: element.trimEnd,
 						volume: 1,
 						muted,
+						playbackRate: element.playbackRate ?? 1,
+						reversed: element.reversed ?? false,
 					};
 				}),
 			);
@@ -535,14 +538,19 @@ function mixAudioChannels({
 		trimStart,
 		duration: elementDuration,
 		volume,
+		playbackRate = 1,
+		reversed = false,
 	} = element;
 
 	const sourceStartSample = Math.floor(trimStart * buffer.sampleRate);
-	const sourceLengthSamples = Math.floor(elementDuration * buffer.sampleRate);
+	const sourceEndSample = Math.min(
+		buffer.length - 1,
+		Math.ceil((trimStart + elementDuration * playbackRate) * buffer.sampleRate) -
+			1,
+	);
 	const outputStartSample = Math.floor(startTime * sampleRate);
-
-	const resampleRatio = sampleRate / buffer.sampleRate;
-	const resampledLength = Math.floor(sourceLengthSamples * resampleRatio);
+	const outputSampleCount = Math.floor(elementDuration * sampleRate);
+	const sourceStep = (buffer.sampleRate / sampleRate) * playbackRate;
 
 	const outputChannels = 2;
 	for (let channel = 0; channel < outputChannels; channel++) {
@@ -550,13 +558,15 @@ function mixAudioChannels({
 		const sourceChannel = Math.min(channel, buffer.numberOfChannels - 1);
 		const sourceData = buffer.getChannelData(sourceChannel);
 
-		for (let i = 0; i < resampledLength; i++) {
+		for (let i = 0; i < outputSampleCount; i++) {
 			const outputIndex = outputStartSample + i;
 			if (outputIndex >= outputLength) break;
 
-			const sourcePos = sourceStartSample + i / resampleRatio;
+			const sourcePos = reversed
+				? sourceEndSample - i * sourceStep
+				: sourceStartSample + i * sourceStep;
 			const sourceIndex = Math.floor(sourcePos);
-			if (sourceIndex >= sourceData.length) break;
+			if (sourceIndex < 0 || sourceIndex >= sourceData.length) continue;
 
 			const fraction = sourcePos - sourceIndex;
 			const sample0 = sourceData[sourceIndex];

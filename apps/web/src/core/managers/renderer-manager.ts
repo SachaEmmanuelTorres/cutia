@@ -4,6 +4,8 @@ import type { ExportOptions, ExportResult } from "@/types/export";
 import { SceneExporter } from "@/services/renderer/scene-exporter";
 import { buildScene } from "@/services/renderer/scene-builder";
 import { createTimelineAudioBuffer } from "@/lib/media/audio";
+import { getSelectedVideoClip } from "@/lib/export";
+import type { TimelineTrack } from "@/types/timeline";
 
 export class RendererManager {
 	private renderTree: RootNode | null = null;
@@ -25,11 +27,52 @@ export class RendererManager {
 	}: {
 		options: ExportOptions;
 	}): Promise<ExportResult> {
+		return this.exportTracks({
+			tracks: this.editor.timeline.getTracks(),
+			duration: this.editor.timeline.getTotalDuration(),
+			emptyError: "Project is empty",
+			options,
+		});
+	}
+
+	async exportSelectedClip({
+		selection,
+		options,
+	}: {
+		selection: { trackId: string; elementId: string };
+		options: ExportOptions;
+	}): Promise<ExportResult> {
+		const clip = getSelectedVideoClip({
+			tracks: this.editor.timeline.getTracks(),
+			selection,
+		});
+		if (!clip) {
+			return { success: false, error: "Selected element is not a video" };
+		}
+
+		return this.exportTracks({
+			tracks: clip.tracks,
+			duration: clip.duration,
+			emptyError: "Selected clip is empty",
+			options,
+		});
+	}
+
+	private async exportTracks({
+		tracks,
+		duration,
+		emptyError,
+		options,
+	}: {
+		tracks: TimelineTrack[];
+		duration: number;
+		emptyError: string;
+		options: ExportOptions;
+	}): Promise<ExportResult> {
 		const { format, quality, fps, includeAudio, onProgress, onCancel } =
 			options;
 
 		try {
-			const tracks = this.editor.timeline.getTracks();
 			const mediaAssets = this.editor.media.getAssets();
 			const activeProject = this.editor.project.getActive();
 
@@ -37,9 +80,8 @@ export class RendererManager {
 				return { success: false, error: "No active project" };
 			}
 
-			const duration = this.editor.timeline.getTotalDuration();
 			if (duration === 0) {
-				return { success: false, error: "Project is empty" };
+				return { success: false, error: emptyError };
 			}
 
 			const exportFps = fps || activeProject.settings.fps;

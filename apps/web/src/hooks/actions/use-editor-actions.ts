@@ -9,6 +9,8 @@ import { getElementsAtTime } from "@/lib/timeline";
 import { generateAndInsertSpeech } from "@/lib/tts/service";
 import { toast } from "sonner";
 import { i18next } from "@/lib/i18n";
+import { DEFAULT_EXPORT_OPTIONS } from "@/constants/export-constants";
+import { getExportFileExtension, getExportMimeType } from "@/lib/export";
 
 export function useEditorActions() {
 	const editor = useEditor();
@@ -284,6 +286,53 @@ export function useEditorActions() {
 			});
 
 			setClipboard({ items });
+		},
+		undefined,
+	);
+
+	useActionHandler(
+		"export-selected-clip",
+		() => {
+			if (selectedElements.length !== 1) return;
+
+			const [{ element } = { element: null }] =
+				editor.timeline.getElementsWithTracks({ elements: selectedElements });
+			if (element?.type !== "video") return;
+
+			const toastId = "export-selected-clip";
+			toast.loading(i18next.t("Exporting project"), { id: toastId });
+
+			(async () => {
+				const result = await editor.renderer.exportSelectedClip({
+					selection: selectedElements[0],
+					options: DEFAULT_EXPORT_OPTIONS,
+				});
+
+				if (!result.success || !result.buffer) {
+					toast.error(i18next.t("Failed to export clip"), {
+						id: toastId,
+						description: result.error,
+					});
+					return;
+				}
+
+				const blob = new Blob([result.buffer], {
+					type: getExportMimeType({ format: DEFAULT_EXPORT_OPTIONS.format }),
+				});
+				const url = URL.createObjectURL(blob);
+				const link = document.createElement("a");
+				link.href = url;
+				link.download = `${element.name}-clip${getExportFileExtension({ format: DEFAULT_EXPORT_OPTIONS.format })}`;
+				document.body.appendChild(link);
+				link.click();
+				link.remove();
+				URL.revokeObjectURL(url);
+
+				toast.success(i18next.t("Clip exported"), { id: toastId });
+			})().catch((error) => {
+				console.error("Failed to export selected clip:", error);
+				toast.error(i18next.t("Failed to export clip"), { id: toastId });
+			});
 		},
 		undefined,
 	);
