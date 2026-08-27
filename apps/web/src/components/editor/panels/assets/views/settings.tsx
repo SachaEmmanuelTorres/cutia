@@ -88,15 +88,21 @@ function ProjectSettingsTabs() {
 const CANVAS_FIT_VALUE = "fit";
 const CANVAS_CUSTOM_VALUE = "custom";
 
-function resolveCanvasSizePresetValue({
+export function resolveCanvasSizePresetValue({
 	width,
 	height,
 	originalCanvasSize,
+	customSelected = false,
 }: {
 	width: number;
 	height: number;
 	originalCanvasSize: { width: number; height: number } | null;
+	customSelected?: boolean;
 }): string {
+	if (customSelected) {
+		return CANVAS_CUSTOM_VALUE;
+	}
+
 	const isOriginalMatch =
 		originalCanvasSize &&
 		originalCanvasSize.width === width &&
@@ -121,11 +127,13 @@ function ProjectInfoView() {
 
 	const currentCanvasSize = activeProject.settings.canvasSize;
 	const originalCanvasSize = activeProject.settings.originalCanvasSize ?? null;
+	const [customSelected, setCustomSelected] = useState(false);
 
 	const selectedValue = resolveCanvasSizePresetValue({
 		width: currentCanvasSize.width,
 		height: currentCanvasSize.height,
 		originalCanvasSize,
+		customSelected,
 	});
 
 	const isCustom = selectedValue === CANVAS_CUSTOM_VALUE;
@@ -133,6 +141,8 @@ function ProjectInfoView() {
 	const [customHeight, setCustomHeight] = useState(currentCanvasSize.height);
 
 	const handleCanvasSizeChange = ({ value }: { value: string }) => {
+		setCustomSelected(value === CANVAS_CUSTOM_VALUE);
+
 		if (value === CANVAS_FIT_VALUE) {
 			const canvasSize = originalCanvasSize ?? currentCanvasSize;
 			editor.project.updateSettings({ settings: { canvasSize } });

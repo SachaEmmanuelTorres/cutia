@@ -9,6 +9,7 @@ export interface CanvasSizePreset {
 export const CANVAS_SIZE_PRESETS: CanvasSizePreset[] = [
 	{ label: "480p", width: 854, height: 480 },
 	{ label: "720p", width: 1280, height: 720 },
+	{ label: "768p", width: 1366, height: 768 },
 	{ label: "1080p", width: 1920, height: 1080 },
 	{ label: "720p Portrait", width: 720, height: 1280 },
 	{ label: "1080p Portrait", width: 1080, height: 1920 },
