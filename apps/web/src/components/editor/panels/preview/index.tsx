@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo, useRef } from "react";
+import { useCallback, useEffect, useMemo, useRef } from "react";
 import useDeepCompareEffect from "use-deep-compare-effect";
 import { X } from "lucide-react";
 import { useEditor } from "@/hooks/use-editor";
@@ -29,7 +29,10 @@ import {
 	PlayIcon,
 } from "@hugeicons/core-free-icons";
 import { HugeiconsIcon } from "@hugeicons/react";
-import { useMediaPreviewStore } from "@/stores/media-preview-store";
+import {
+	handleMediaPreviewKeyDown,
+	useMediaPreviewStore,
+} from "@/stores/media-preview-store";
 import type { MediaAsset } from "@/types/assets";
 import { cn } from "@/utils/ui";
 import { useTranslation } from "@i18next-toolkit/nextjs-approuter";
@@ -97,6 +100,14 @@ export function PreviewPanel() {
 			null
 		);
 	}, [selectedMediaId, editor.media]);
+
+	useEffect(() => {
+		if (!selectedAsset) return;
+
+		window.addEventListener("keydown", handleMediaPreviewKeyDown);
+		return () =>
+			window.removeEventListener("keydown", handleMediaPreviewKeyDown);
+	}, [selectedAsset]);
 
 	return (
 		<div
